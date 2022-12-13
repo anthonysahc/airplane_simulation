@@ -19,7 +19,7 @@ void UAltimeter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	m_startRotation = GetOwner()->GetActorRotation();
 	
 }
 
@@ -29,6 +29,40 @@ void UAltimeter::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	SetAltitudeNeedle();
 }
+
+void UAltimeter::SetTarget(AActor* Target)
+{
+	m_target = Target;
+}
+
+void UAltimeter::SetAltitudeNeedle()
+{	
+
+	if (m_target != nullptr)
+	{
+		double altitude = m_target->GetActorLocation().Z;
+
+
+		FRotator rotation = FRotator(altitude * 360 / m_maxAltitude, m_startRotation.Yaw, m_startRotation.Roll);
+
+		if (altitude > m_maxAltitude)
+		{
+			GetOwner()->SetActorRotation(FRotator(360, m_startRotation.Yaw, m_startRotation.Roll));
+		}
+		else if (altitude > 0)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Rotation : %s"), *rotation.ToString());
+			GetOwner()->SetActorRotation(rotation);
+			UE_LOG(LogTemp, Display, TEXT("Rotation Owner : %s"), *GetOwner()->GetActorRotation().ToString());
+		}
+		else
+		{
+			GetOwner()->SetActorRotation(FRotator(0, m_startRotation.Yaw , m_startRotation.Roll));
+		}
+	}
+	
+}
+
 
